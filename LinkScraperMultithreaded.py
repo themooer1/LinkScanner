@@ -13,7 +13,6 @@ def loadSites():
 currenttask=0
 def scanlist(siteList, iterations=2, threads=1):
     global currenttask
-    linksFull=list()
     links=list()
     print("Running iteration {}".format(currenttask+1))
     for url in siteList:
@@ -23,12 +22,13 @@ def scanlist(siteList, iterations=2, threads=1):
     print(links)
     currenttask += 1
     if currenttask<iterations:
-        linksFull+=scanlist(links)
+        links+=scanlist(links)
     for link in links:
         if "mailto:" in link:
             links.remove(link)
-    return linksFull
+    return links
 def save(links,filename='links.txt'):
+    print("Saving...")
     with open(filename,"w+") as linksf:
         linksf.write('\n'.join(map(str,links)))
         linksf.close()
