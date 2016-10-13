@@ -10,7 +10,7 @@ def loadSites():
     return siteList
 
 currenttask=0
-def scanlist(siteList, iterations=6):
+def scanlist(siteList, iterations=2):
     global currenttask
     linksFull=list()
     links=list()
@@ -28,4 +28,4 @@ def save(links,filename='links.txt'):
         linksf.write('\n'.join(map(str,links)))
         linksf.close()
 print('Hello!')
-save(scanlist(loadSites(),iterations=3))
+save(scanlist(loadSites(),iterations=2))
