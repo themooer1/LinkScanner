@@ -23,9 +23,6 @@ def scanlist(siteList, iterations=2, threads=1):
     currenttask += 1
     if currenttask<iterations:
         links+=scanlist(links)
-    for link in links:
-        if "mailto:" in link:
-            links.remove(link)
     return links
 def save(links,filename='links.txt'):
     print("Saving...")
