@@ -24,7 +24,10 @@ def scanlist(siteList, iterations=2, threads=1):
     currenttask += 1
     if currenttask<iterations:
         linksFull+=scanlist(links)
-    return links
+    for link in links:
+        if "mailto:" in link:
+            links.remove(link)
+    return linksFull
 def save(links,filename='links.txt'):
     with open(filename,"w+") as linksf:
         linksf.write('\n'.join(map(str,links)))
