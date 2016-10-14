@@ -1,5 +1,6 @@
 from splinter import Browser
-
+import threading
+import queue
 
 executable_path = {'executable_path':'/usr/local/bin/phantomjs'}
 b=Browser("phantomjs",**executable_path)
@@ -9,6 +10,13 @@ def loadSites():
     siteList = siteListf.read().split(",")
     siteListf.close()
     return siteList
+def scanlistThreaded(siteList, iterations=2, threads=1):
+    threads=[]
+    threadsize=int(len(siteList)/threads))
+    for i in range(0,threads):
+        t=threading.Thread(target=scanlist,args=(siteList[i*threadsize:(i+1)*threadsize],iterations=2))
+        threads.append(t)
+        t.start()
 
 currenttask=0
 def scanlist(siteList, iterations=2):
@@ -30,4 +38,4 @@ def save(links,filename='links.txt'):
         linksf.write('\n'.join(map(str,links)))
         linksf.close()
 print('Hello!')
-save(scanlist(loadSites(),iterations=2))
+save(scanlist(loadSites(),iterations=2,threads=8))
