@@ -29,8 +29,12 @@ class Scanner:
             siteList = siteListf.read().split(",")
             siteListf.close()
         return siteList
+    def isValidURL(self,url):
+        if "mailto:" in str(url):
+            return False
+        else: return True
+
     def startScan(self):
-#        threads=[]
         self.linkqueue.extendleft([(x,1) for x in self.siteList])
         print(self.linkqueue.tolist())
         while not self.linkqueue.peek(0)[1] > self.recursion:
@@ -45,13 +49,15 @@ class Scanner:
 
     def scan(self):
         url,tasknum = self.linkqueue.pop()
-        b.visit(str(url))
-        links = [x['href'] for x in b.find_by_tag('a')]
-        print("sitefinished")
-        print(links)
-        for x in links:
-            self.linkqueue.extendleft((x,tasknum+1))
-        self.output=self.output+links
+        if "mailto:" not in str(url):
+            b.visit(str(url))
+            links = [x['href'] for x in b.find_by_tag('a')]
+            print("sitefinished")
+            print(links)
+            for x in links:
+                self.linkqueue.extendleft((x,tasknum+1))
+            self.output=self.output+links
+        else: pass
     def save(self,filename='links.txt'):
         print("Saving...")
         with open(filename,"w+") as linksf:
