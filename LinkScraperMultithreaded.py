@@ -46,8 +46,9 @@ class Scanner:
                 p=threading.Thread(target=self.scan)
                 p.start()
                 print("Thread Added!")
+                print("Running threads: " + str(threading.enumerate()))
             elif len(threading.enumerate()) >=self.maxthreads:
-                threading.enumerate()[0].join()
+                threading.enumerate()[-1].join()
                 print("{} Threads Reached!".format(len(threading.enumerate())))
             else: sleep(1)
 
@@ -58,7 +59,6 @@ class Scanner:
         if "mailto:" not in str(url):
             b.visit(str(url))
             links = [x['href'] for x in b.find_by_tag('a')]
-            print("sitefinished")
             print(links)
             for x in links:
                 self.linkqueue.appendleft((x,tasknum+1))
