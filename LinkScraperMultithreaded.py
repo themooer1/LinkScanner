@@ -8,7 +8,6 @@ class peekQueue(deque):
     def __init__(self):
         self.lock=threading.Lock()
     def tolist(self):
-        print("LISTSELF"+ str(list(self)))
         return list(self)
     def isEmpty(self):
         return False if len(self) > 0 else True
@@ -70,7 +69,6 @@ class Scanner:
                 p=threading.Thread(target=self.scan)
                 p.start()
                 print("Thread Added!")
-                print("Running threads: " + str(threading.enumerate()))
             elif len(threading.enumerate()) >=self.maxthreads:
                 threading.enumerate()[-1].join()
                 print("{} Threads Reached!".format(len(threading.enumerate())))
@@ -83,7 +81,6 @@ class Scanner:
         if "mailto:" not in str(url):
             r = requests.get(url)
             links = self.getAllLinks(r.text)
-            print(links[-20:])
             for x in links:
                 self.linkqueue.appendleft((x,tasknum+1))
             self.output=self.output+links
@@ -95,6 +92,6 @@ class Scanner:
             linksf.close()
 print('Hello!')
 if __name__=='__main__':
-    linkscanner=Scanner(iterations=4,maxthreads=20)
+    linkscanner=Scanner(iterations=3,maxthreads=20)
     linkscanner.startScan()
     linkscanner.save()
