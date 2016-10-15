@@ -1,25 +1,28 @@
 from splinter import Browser
 import threading
-import queue
+from queue import Queue
 
 executable_path = {'executable_path':'/usr/local/bin/phantomjs'}
 b=Browser("phantomjs",**executable_path)
-
+class Scanner:
+    def __init__(self,siteList,iterations=2,maxthreads=8):
+        self.recursion=iterations
+        self.threads=maxthreads
+        self.siteList=siteList
+        self.output=[]
+        
 def loadSites():
     siteListf = open('siteList.txt','r')
     siteList = siteListf.read().split(",")
     siteListf.close()
     return siteList
-def scanlistThreaded(siteList, iterations=2, threads=1):
-    threads=[]
-    threadsize=int(len(siteList)/threads))
-    for i in range(0,threads):
-        t=threading.Thread(target=scanlist,args=(siteList[i*threadsize:(i+1)*threadsize],iterations=2))
-        threads.append(t)
-        t.start()
-
+def scanlistThreaded(siteList, iterations=2, maxthreads=1):
+    threads=list()
+    siteList = Queue()
+    while not siteList.empty():
+        p=Process(target=scan(Queue.))
 currenttask=0
-def scanlist(siteList, iterations=2):
+def scan(siteList, iterations=2):
     global currenttask
     links=list()
     print("Running iteration {}".format(currenttask+1))
