@@ -1,10 +1,9 @@
-from splinter import Browser
+import requests
+import string
 import threading
 from collections import deque
 from time import sleep
 
-executable_path = {'executable_path':'/usr/local/bin/phantomjs'}
-b=Browser("phantomjs",**executable_path)
 class peekQueue(deque):
     def __init__(self):
         self.lock=threading.Lock()
@@ -33,6 +32,31 @@ class Scanner:
             siteList = siteListf.read().split(",")
             siteListf.close()
         return siteList
+
+    def getAllLinks(self,html):
+        links = []
+        start = html.find('href="')
+        end = html.find('"', start + 6)
+        while True:
+            if start == 5:
+                print(links)
+                try:
+                    del links[-1]
+                except:
+                    pass
+                break
+            else:
+                start = html.find('href="') + 6
+                end = html.find('"', start)
+                link = html[start:end]
+                if 'http://' in link:
+                    links.append(link)
+                elif 'https://' in link:
+                    links.append(link)
+                elif '//' in link:
+                    links.append('http:'+link)
+                html = html[end:]
+        return links
     def isValidURL(self,url):
         if "mailto:" in str(url):
             return False
@@ -57,9 +81,9 @@ class Scanner:
         with self.linkqueue.lock:
             url,tasknum = self.linkqueue.pop()
         if "mailto:" not in str(url):
-            b.visit(str(url))
-            links = [x['href'] for x in b.find_by_tag('a')]
-            print(links)
+            r = requests.get(url)
+            links = self.getAllLinks(r.text)
+            print(links[-20:])
             for x in links:
                 self.linkqueue.appendleft((x,tasknum+1))
             self.output=self.output+links
@@ -71,6 +95,6 @@ class Scanner:
             linksf.close()
 print('Hello!')
 if __name__=='__main__':
-    linkscanner=Scanner()
+    linkscanner=Scanner(iterations=4,maxthreads=20)
     linkscanner.startScan()
     linkscanner.save()
