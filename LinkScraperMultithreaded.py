@@ -1,22 +1,24 @@
 from splinter import Browser
 import threading
-from queue import PriorityQueue
+from collections import deque
 
 executable_path = {'executable_path':'/usr/local/bin/phantomjs'}
 b=Browser("phantomjs",**executable_path)
-class peekQueue(PriorityQueue):
+class peekQueue(deque):
     def peek(self,index=0):
-        if type(index) == int:
-            return self.queue[item]
+        if type(index) == int and not self.isEmpty():
+            return list(self)[index]
         else:
             raise TypeError
     def tolist(self):
         return list(self.queue)
+    def isEmpty(self):
+        return True if len(self) > 0 else False
 class Scanner:
     def __init__(self,siteList='siteList.txt',iterations=2,maxthreads=8):
         self.recursion=iterations
         self.linkqueue=peekQueue
-        self.threads=maxthreads
+        self.maxthreads=maxthreads
         self.siteList=self.loadSites(siteList)
         self.output=[]
     def loadSites(self,sitefilename):
@@ -25,10 +27,17 @@ class Scanner:
             siteListf.close()
         return siteList
     def startScan(self):
-        threads=list()
+        map(lambda x:self.linkqueue.appendleft((x,1)),self.siteList)
         while not self.linkqueue.peek('0')[1] > self.recursion:
-            p=threading.Thread(target=self.scan())
-    def scan(self,siteList, iterations=2):
+            with list() as threads:
+                if len(threads) <=self.maxthreads:
+                    p=threading.Thread(target=self.scan())
+                    threads.append(p)
+                    print("Thread Added!")
+                else:
+                    print("{} Threads Reached!".format(len(threads)))
+
+    def scan(self):
         url = self.linkqueue.get()
         b.visit(str(url))
         links = list(map(lambda x:x['href'], b.find_by_tag('a')))
