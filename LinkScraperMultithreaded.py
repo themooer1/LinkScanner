@@ -5,19 +5,20 @@ from collections import deque
 executable_path = {'executable_path':'/usr/local/bin/phantomjs'}
 b=Browser("phantomjs",**executable_path)
 class peekQueue(deque):
-    def peek(self,index=0):
-        if type(index) == int and not self.isEmpty():
-            return list(self)[index]
-        else:
-            raise TypeError
     def tolist(self):
         return list(self.queue)
     def isEmpty(self):
         return True if len(self) > 0 else False
+    def peek(self,index=0):
+        index=int(index)
+        if not self.isEmpty():
+            return list(self)[index]
+        else:
+            raise TypeError
 class Scanner:
     def __init__(self,siteList='siteList.txt',iterations=2,maxthreads=8):
         self.recursion=iterations
-        self.linkqueue=peekQueue
+        self.linkqueue=peekQueue()
         self.maxthreads=maxthreads
         self.siteList=self.loadSites(siteList)
         self.output=[]
@@ -27,23 +28,29 @@ class Scanner:
             siteListf.close()
         return siteList
     def startScan(self):
+        threads=[]
         map(lambda x:self.linkqueue.appendleft((x,1)),self.siteList)
-        while not self.linkqueue.peek('0')[1] > self.recursion:
+        while not self.linkqueue[0][1] > self.recursion:
             with list() as threads:
                 if len(threads) <=self.maxthreads:
                     p=threading.Thread(target=self.scan())
                     threads.append(p)
+                    p.start()
+                for t in threads:
+                    if not t.is_alive():
+                        threads.remove(t)
                     print("Thread Added!")
                 else:
+                    threads[0].join()
                     print("{} Threads Reached!".format(len(threads)))
 
     def scan(self):
-        url = self.linkqueue.get()
+        url = self.linkqueue.pop()
         b.visit(str(url))
         links = list(map(lambda x:x['href'], b.find_by_tag('a')))
         print("sitefinished")
         print(links)
-        map(lambda x:self.linkqueue.put(x),links)
+        map(lambda x:self.linkqueue.appendleft(x),links)
         self.linkqueue.task_done(url)
         self.output=self.output+links
     def save(self,filename='links.txt'):
