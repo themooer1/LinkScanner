@@ -1,3 +1,4 @@
 *.txt
 *.log
 .idea/workspace.xml
+ghostdriver.log
