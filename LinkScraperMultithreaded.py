@@ -38,7 +38,6 @@ class Scanner:
         end = html.find('"', start + 6)
         while True:
             if start == 5:
-                print(links)
                 try:
                     del links[-1]
                 except:
@@ -68,7 +67,7 @@ class Scanner:
             if (len(threading.enumerate()) <=self.maxthreads) and not self.linkqueue.isEmpty():
                 p=threading.Thread(target=self.scan)
                 p.start()
-                print("Thread Added!")
+#                print("Thread Added!")
             elif len(threading.enumerate()) >=self.maxthreads:
                 threading.enumerate()[-1].join()
                 print("{} Threads Reached!".format(len(threading.enumerate())))
