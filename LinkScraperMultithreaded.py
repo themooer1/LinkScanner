@@ -70,7 +70,7 @@ class Scanner:
 #                print("Thread Added!")
             elif len(threading.enumerate()) >=self.maxthreads:
                 threading.enumerate()[-1].join()
-                print("{} Threads Reached!".format(len(threading.enumerate())))
+                print("{0} Threads Reached!".format(len(threading.enumerate())))
             else: sleep(1)
 
 
