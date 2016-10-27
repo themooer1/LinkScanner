@@ -24,7 +24,7 @@ class Scanner:
         self.maxthreads=maxthreads
         self.siteList=self.loadSites(siteList)
         print("Sitelist:"+str(self.siteList))
-        self.output=[]
+        self.output={}
 
     def loadSites(self,sitefilename):
         with open(str(sitefilename),'r') as siteListf:
@@ -77,13 +77,16 @@ class Scanner:
     def scan(self):
         with self.linkqueue.lock:
             url,tasknum = self.linkqueue.pop()
-        if "mailto:" not in str(url):
+        if "mailto:" in str(url):
+            pass
+        elif url in self.output:
+            self.output.update({url: {'getCount': self.output[url]['getCount'] + 1}})
+        else:
             r = requests.get(url)
             links = self.getAllLinks(r.text)
             for x in links:
                 self.linkqueue.appendleft((x,tasknum+1))
-            self.output=self.output+links
-        else: pass
+            self.output.update({url:{'getCount':1}})
     def save(self,filename='links.txt'):
         print("Saving...")
         with open(filename,"w+") as linksf:
