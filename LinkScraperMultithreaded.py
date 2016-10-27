@@ -18,13 +18,18 @@ class peekQueue(deque):
         except:
             return (None,1)
 class Scanner:
-    def __init__(self,siteList='siteList.txt',iterations=2,maxthreads=8):
+    def __init__(self,siteList='siteList.txt',iterations=2,maxthreads=8,autoSave=30):
+        """Iterations is the recursion depth to which the scanner will follow URLs.  Maxthreads is how many individual URLs
+        the scanner will request in parallel.  AutoSave indicates the number of seconds between automatic saves or False
+        to disable."""
         self.recursion=iterations
         self.linkqueue=peekQueue()
         self.maxthreads=maxthreads
         self.siteList=self.loadSites(siteList)
         print("Sitelist:"+str(self.siteList))
         self.output={}
+        if autoSave is not False:
+            self.autoSaveDave=threading.Thread(name="autoSave",target=self.autoSave(int(autoSave)))
 
     def loadSites(self,sitefilename):
         with open(str(sitefilename),'r') as siteListf:
@@ -63,8 +68,9 @@ class Scanner:
     def startScan(self):
         self.linkqueue.extendleft([(x,1) for x in self.siteList])
         print(self.linkqueue.tolist())
+        self.autoSaveDave.start()
         while not self.linkqueue.peek(0)[1] > self.recursion:
-            if (len(threading.enumerate()) <=self.maxthreads) and not self.linkqueue.isEmpty():
+            if (len(threading.enumerate()) <=self.maxthreads+1) and not self.linkqueue.isEmpty():
                 p=threading.Thread(target=self.scan)
                 p.start()
 #                print("Thread Added!")
@@ -82,7 +88,7 @@ class Scanner:
         elif url in self.output:
             self.output.update({url: {'getCount': self.output[url]['getCount'] + 1}})
         else:
-            r = requests.get(url)
+            r = requests.get(url,verify=False)
             links = self.getAllLinks(r.text)
             for x in links:
                 self.linkqueue.appendleft((x,tasknum+1))
@@ -90,10 +96,15 @@ class Scanner:
     def save(self,filename='links.txt'):
         print("Saving...")
         with open(filename,"w+") as linksf:
-            linksf.write('\n'.join(map(str,self.output)))
+            linksf.write('\n'.join(map(str,self.output.keys())))
             linksf.close()
+    def autoSave(self,delay):
+        while True:
+            sleep(delay)
+            print("Saving...")
+            self.save()
 print('Hello!')
 if __name__=='__main__':
-    linkscanner=Scanner(iterations=3,maxthreads=20)
+    linkscanner=Scanner(iterations=5,maxthreads=50,autoSave=False)
     linkscanner.startScan()
     linkscanner.save()
