@@ -28,6 +28,7 @@ class Scanner:
         self.siteList=self.loadSites(siteList)
         print("Sitelist:"+str(self.siteList))
         self.output={}
+        self.autoSaveDave = None
         if autoSave is not False:
             self.autoSaveDave=threading.Thread(name="autoSave",target=self.autoSave(int(autoSave)))
 
@@ -68,7 +69,8 @@ class Scanner:
     def startScan(self):
         self.linkqueue.extendleft([(x,1) for x in self.siteList])
         print(self.linkqueue.tolist())
-        self.autoSaveDave.start()
+        if self.autoSaveDave !=None:
+            self.autoSaveDave.start()
         while not self.linkqueue.peek(0)[1] > self.recursion:
             if (len(threading.enumerate()) <=self.maxthreads+1) and not self.linkqueue.isEmpty():
                 p=threading.Thread(target=self.scan)
@@ -77,13 +79,17 @@ class Scanner:
             elif len(threading.enumerate()) >=self.maxthreads:
                 threading.enumerate()[-1].join()
                 print("{0} Threads Reached!".format(len(threading.enumerate())))
-            else: sleep(1)
+                self.save()
+            else:
+                sleep(1)
 
 
     def scan(self):
         with self.linkqueue.lock:
             url,tasknum = self.linkqueue.pop()
         if "mailto:" in str(url):
+            pass
+        elif 'android-app://' in str(url):
             pass
         elif url in self.output:
             self.output.update({url: {'getCount': self.output[url]['getCount'] + 1}})
@@ -96,15 +102,14 @@ class Scanner:
     def save(self,filename='links.txt'):
         print("Saving...")
         with open(filename,"w+") as linksf:
-            linksf.write('\n'.join(map(str,self.output.keys())))
+            linksf.write("RESULTS\n"+'\n'.join(map(str,self.output.keys())))
             linksf.close()
     def autoSave(self,delay):
         while True:
             sleep(delay)
-            print("Saving...")
             self.save()
 print('Hello!')
 if __name__=='__main__':
-    linkscanner=Scanner(iterations=5,maxthreads=50,autoSave=False)
+    linkscanner=Scanner(iterations=30000000000000,maxthreads=20,autoSave=False)
     linkscanner.startScan()
     linkscanner.save()
