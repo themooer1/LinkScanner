@@ -20,6 +20,7 @@ class peekQueue(deque):
             return (None,1)
 class Scanner:
     def __init__(self,siteList='siteList.txt',iterations=2,maxthreads=8):
+        """Creates a Scanner object that reads in a file of links separated by line, and finds all the links on those pages.  It repeats this process for the specified number of iterations."""
         self.recursion=iterations
         self.linkqueue=peekQueue()
         self.maxthreads=maxthreads
@@ -99,7 +100,3 @@ class Scanner:
             linksf.write('\n'.join(map(str,self.output)))
             linksf.close()
 print('Hello!')
-if __name__=='__main__':
-    linkscanner=Scanner(iterations=3,maxthreads=20)
-    linkscanner.startScan()
-    linkscanner.save()
