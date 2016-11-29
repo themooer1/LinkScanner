@@ -91,9 +91,11 @@ class Scanner:
             pass
         elif "android-app:" in str(url):
             pass
-        elif "http" not in str(url):
-            if "www." in str(url):
+        elif "http://" not in str(url):
+            if "//" not in str(url):
                 url="http://"+url
+            else:
+                url="http:"+url
         elif url in self.output:
             self.output.update({url: {'getCount': self.output[url]['getCount'] + 1}})
         else:
