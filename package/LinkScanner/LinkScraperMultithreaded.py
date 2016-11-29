@@ -30,7 +30,7 @@ class Scanner:
 
     def loadSites(self,sitefilename):
         with open(str(sitefilename),'r') as siteListf:
-            siteList = siteListf.read().split(",")
+            siteList = siteListf.read().split("\n")
             siteListf.close()
         return siteList
 
@@ -65,23 +65,28 @@ class Scanner:
     def startScan(self):
         self.linkqueue.extendleft([(x,1) for x in self.siteList])
         print(self.linkqueue.tolist())
+        self.autos=threading.Thread(target=self.autosave)
+        self.autos.start()
         while not self.linkqueue.peek(0)[1] > self.recursion:
             if (len(threading.enumerate()) <=self.maxthreads) and not self.linkqueue.isEmpty():
                 p=threading.Thread(target=self.scan)
                 p.start()
-#                print("Thread Added!")
+                print("Thread Added!")
             elif len(threading.enumerate()) >=self.maxthreads:
                 threading.enumerate()[-1].join()
                 print("{0} Threads Reached!".format(len(threading.enumerate())))
-
+                self.save()
             else:
                 self.save()
-                sleep(.5)
-
+                sleep(1.5)
+    def autosave(self):
+        self.save()
+        sleep(5)
 
     def scan(self):
         with self.linkqueue.lock:
             url,tasknum = self.linkqueue.pop()
+        print("Scanning " + str(url))
         if "mailto:" in str(url):
             pass
         elif "android-app:" in str(url):
@@ -90,6 +95,7 @@ class Scanner:
             self.output.update({url: {'getCount': self.output[url]['getCount'] + 1}})
         else:
             r = requests.get(url)
+#            print("Link is Good")
             links = self.getAllLinks(r.text)
             for x in links:
                 self.linkqueue.appendleft((x,tasknum+1))
@@ -97,6 +103,6 @@ class Scanner:
     def save(self,filename='links.txt'):
         print("Saving...")
         with open(filename,"w+") as linksf:
-            linksf.write('\n'.join(map(str,self.output)))
+            linksf.write('\n'.join(map(str,self.output.keys())))
             linksf.close()
 print('Hello!')
