@@ -1,2 +1,2 @@
-from LinkScraperMultithreaded import peekQueue
-from LinkScraperMultithreaded import Scanner
+from LinkScanner.LinkScraperMultithreaded import peekQueue
+from LinkScanner.LinkScraperMultithreaded import Scanner
