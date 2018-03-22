@@ -1,9 +1,9 @@
 # LinkScanner <br><img src="https://img.shields.io/github/downloads/themooer1/LinkScanner/total.svg"> <img src="https://img.shields.io/pypi/dm/LinkScanner.svg">  <a href="/to/themooer1"><img src="https://img.shields.io/badge/Say%20Thanks!-🦉-1EAEDB.svg"></a>
 Follow links from website to website.
 
-##Usage
+## Usage
 LinkScanner takes input from a text file with newline seperated links, locates the links on those pages and either outputs them to links.txt or locates the links on those pages to a set recursion depth.
-####Import
+#### Import
 ```python
 import LinkScanner
 ```
@@ -22,7 +22,7 @@ The second line is most important, as it set the options for the scanner and pro
 | maxthreads    | no |8|The most worker threads allowed to run at once|
 | siteList |yes|siteList.txt|The name of the input file in the same directory.|
 
-####Input
+#### Input
 The input `sitelist.txt` must be formatted as follows.
 ```
 https://wikipedia.org
